@@ -4,7 +4,7 @@ import { useBuyerOrderStore } from '@/shared/stores/buyerOrderStore';
 
 /**
  * Service to fetch buyer orders from API or persisted buyer order store.
- * Zero hardcoded demo data: directly connects to backend API and persisted store.
+ * Strictly isolates cached orders by wallet address and persists empty states.
  */
 class BuyerOrderApiService extends BaseApi {
   public constructor() {
@@ -12,20 +12,24 @@ class BuyerOrderApiService extends BaseApi {
   }
 
   async getOrders(walletAddress?: string): Promise<BuyerOrder[]> {
+    if (!walletAddress) {
+      return [];
+    }
+
     try {
-      const url = walletAddress
-        ? `/api/buyer/orders?wallet=${encodeURIComponent(walletAddress)}`
-        : '/api/buyer/orders';
+      const url = `/api/buyer/orders?wallet=${encodeURIComponent(walletAddress)}`;
       const response = await this.get<BuyerOrder[]>(url);
       if (response.data && Array.isArray(response.data)) {
+        // Persist response (including empty lists) scoped to this wallet
+        useBuyerOrderStore.getState().setOrdersForWallet(walletAddress, response.data);
         return response.data;
       }
     } catch {
-      // In development or when API is offline, fall back to persistent buyer order store
+      // In development or when API is offline, fall back to wallet-scoped cached store
     }
 
-    // Return orders from persistent client store
-    return useBuyerOrderStore.getState().orders;
+    // Return orders exclusively for this specific wallet
+    return useBuyerOrderStore.getState().getOrdersForWallet(walletAddress);
   }
 }
 

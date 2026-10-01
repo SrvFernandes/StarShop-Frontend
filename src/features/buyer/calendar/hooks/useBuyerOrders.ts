@@ -6,20 +6,34 @@ import { useBuyerOrderStore } from '@/shared/stores/buyerOrderStore';
 
 export function useBuyerOrders() {
   const walletAddress = useUserWalletAddress();
-  const storeOrders = useBuyerOrderStore((state) => state.orders);
-  const setStoreOrders = useBuyerOrderStore((state) => state.setOrders);
-  const [orders, setOrders] = useState<BuyerOrder[]>(storeOrders);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const getOrdersForWallet = useBuyerOrderStore((state) => state.getOrdersForWallet);
+  const setOrdersForWallet = useBuyerOrderStore((state) => state.setOrdersForWallet);
+
+  // Initialize with the current wallet's cached orders (or empty if none/disconnected)
+  const [orders, setOrders] = useState<BuyerOrder[]>(() =>
+    walletAddress ? getOrdersForWallet(walletAddress) : []
+  );
+  const [isLoading, setIsLoading] = useState<boolean>(Boolean(walletAddress));
 
   useEffect(() => {
     let isMounted = true;
 
+    // If wallet is not connected, clear displayed orders immediately
+    if (!walletAddress) {
+      setOrders([]);
+      setIsLoading(false);
+      return;
+    }
+
+    // When wallet changes, update immediate state to this wallet's cache while fetching
+    setOrders(getOrdersForWallet(walletAddress));
+    setIsLoading(true);
+
     fetchBuyerOrders(walletAddress).then((data) => {
       if (isMounted) {
         setOrders(data);
-        if (data.length > 0) {
-          setStoreOrders(data);
-        }
+        // Persist successful response (even if empty) to overwrite stale cache
+        setOrdersForWallet(walletAddress, data);
         setIsLoading(false);
       }
     });
@@ -27,7 +41,7 @@ export function useBuyerOrders() {
     return () => {
       isMounted = false;
     };
-  }, [walletAddress, setStoreOrders]);
+  }, [walletAddress, getOrdersForWallet, setOrdersForWallet]);
 
   return { orders, isLoading };
 }
