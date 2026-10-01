@@ -1,5 +1,6 @@
 import React from 'react';
 import { CalendarFilterState, OrderStatus } from '../types/calendar';
+import { format } from 'date-fns';
 
 interface CalendarFiltersProps {
   filters: CalendarFilterState;
@@ -38,12 +39,8 @@ export const CalendarFilters: React.FC<CalendarFiltersProps> = ({ filters, setFi
     }));
   };
 
-  const startVal = filters.dateRange.start 
-    ? filters.dateRange.start.toISOString().split('T')[0] 
-    : '';
-  const endVal = filters.dateRange.end 
-    ? filters.dateRange.end.toISOString().split('T')[0] 
-    : '';
+  const startVal = filters.dateRange.start ? format(filters.dateRange.start, 'yyyy-MM-dd') : '';
+  const endVal = filters.dateRange.end ? format(filters.dateRange.end, 'yyyy-MM-dd') : '';
 
   return (
     <div className="flex flex-wrap items-end gap-4 p-4 mb-4 border border-white rounded-lg bg-transparent text-white">
