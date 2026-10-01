@@ -1,26 +1,21 @@
 'use client';
 
 import React, { useState } from 'react';
-import { format, addMonths, subMonths } from 'date-fns';
+import { addMonths, subMonths } from 'date-fns';
 import { CalendarView } from '@/features/buyer/calendar/components/CalendarView';
 import { CalendarHeader } from '@/features/buyer/calendar/components/CalendarHeader';
 import { CalendarFilters } from '@/features/buyer/calendar/components/CalendarFilters';
 import { EventDetails } from '@/features/buyer/calendar/components/EventDetails';
 import { useCalendar } from '@/features/buyer/calendar/hooks/useCalendar';
+import { useBuyerOrders } from '@/features/buyer/calendar/hooks/useBuyerOrders';
 import { CalendarEvent } from '@/features/buyer/calendar/types/calendar';
-
-// Mock data for demonstration - In real app, this comes from a store/API
-const MOCK_ORDERS = [
-  { id: '101', status: 'delivered', deliveryDate: new Date(), total: '$120.00', createdAt: new Date() },
-  { id: '102', status: 'shipped', deliveryDate: new Date(Date.now() + 86400000 * 2), total: '$45.00', createdAt: new Date() },
-  { id: '103', status: 'pending', deliveryDate: new Date(Date.now() + 86400000 * 5), total: '$200.00', createdAt: new Date() },
-];
 
 export default function CalendarPage() {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null);
-  
-  const { filteredEvents, filters, setFilters } = useCalendar(MOCK_ORDERS);
+
+  const { orders, isLoading } = useBuyerOrders();
+  const { filteredEvents, filters, setFilters } = useCalendar(orders);
 
   return (
     <div className="min-h-screen p-6 bg-transparent text-white">
@@ -40,11 +35,15 @@ export default function CalendarPage() {
             <CalendarFilters filters={filters} setFilters={setFilters} />
           </div>
 
-          <CalendarView 
-            currentDate={currentDate} 
-            events={filteredEvents} 
-            onEventClick={setSelectedEvent} 
-          />
+          {isLoading ? (
+            <div className="p-8 text-center text-gray-400">Loading orders...</div>
+          ) : (
+            <CalendarView 
+              currentDate={currentDate} 
+              events={filteredEvents} 
+              onEventClick={setSelectedEvent} 
+            />
+          )}
         </div>
       </div>
 
