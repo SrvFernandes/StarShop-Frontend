@@ -1,5 +1,6 @@
 import React from 'react';
-import { format, addMonths, subMonths } from 'date-fns';
+import { format } from 'date-fns';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 interface CalendarHeaderProps {
   currentDate: Date;
@@ -12,18 +13,18 @@ export const CalendarHeader: React.FC<CalendarHeaderProps> = ({ currentDate, onP
     <div className="flex items-center justify-between p-4 mb-4 border border-white rounded-lg bg-transparent text-white">
       <button 
         onClick={onPrevMonth}
-        className="px-4 py-2 transition-colors border border-white rounded hover:bg-white hover:text-black"
+        className="p-2 hover:bg-white/10 rounded-full transition-colors"
       >
-        Previous
+        <ChevronLeft size={24} />
       </button>
       <h2 className="text-xl font-bold">
         {format(currentDate, 'MMMM yyyy')}
       </h2>
       <button 
         onClick={onNextMonth}
-        className="px-4 py-2 transition-colors border border-white rounded hover:bg-white hover:text-black"
+        className="p-2 hover:bg-white/10 rounded-full transition-colors"
       >
-        Next
+        <ChevronRight size={24} />
       </button>
     </div>
   );

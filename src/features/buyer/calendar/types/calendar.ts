@@ -10,7 +10,7 @@ export interface CalendarEvent {
   details: string;
 }
 
-export interface CalendarFilters {
+export interface CalendarFilterState {
   status: OrderStatus | 'all';
   dateRange: {
     start: Date | null;
