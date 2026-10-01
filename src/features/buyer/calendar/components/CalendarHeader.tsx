@@ -1,33 +1,30 @@
 import React from 'react';
-import { format } from 'date-fns';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { format, addMonths, subMonths } from 'date-fns';
 
-interface Props {
+interface CalendarHeaderProps {
   currentDate: Date;
-  onPrev: () => void;
-  onNext: () => void;
+  onPrevMonth: () => void;
+  onNextMonth: () => void;
 }
 
-export const CalendarHeader: React.FC<Props> = ({ currentDate, onPrev, onNext }) => {
+export const CalendarHeader: React.FC<CalendarHeaderProps> = ({ currentDate, onPrevMonth, onNextMonth }) => {
   return (
-    <div className="flex items-center justify-between mb-6">
-      <h2 className="text-2xl font-bold text-white">
+    <div className="flex items-center justify-between p-4 mb-4 border border-white rounded-lg bg-transparent text-white">
+      <button 
+        onClick={onPrevMonth}
+        className="px-4 py-2 transition-colors border border-white rounded hover:bg-white hover:text-black"
+      >
+        Previous
+      </button>
+      <h2 className="text-xl font-bold">
         {format(currentDate, 'MMMM yyyy')}
       </h2>
-      <div className="flex gap-2">
-        <button 
-          onClick={onPrev}
-          className="p-2 rounded-full border border-white/20 text-white hover:bg-white/10 transition-colors"
-        >
-          <ChevronLeft size={20} />
-        </button>
-        <button 
-          onClick={onNext}
-          className="p-2 rounded-full border border-white/20 text-white hover:bg-white/10 transition-colors"
-        >
-          <ChevronRight size={20} />
-        </button>
-      </div>
+      <button 
+        onClick={onNextMonth}
+        className="px-4 py-2 transition-colors border border-white rounded hover:bg-white hover:text-black"
+      >
+        Next
+      </button>
     </div>
   );
 };

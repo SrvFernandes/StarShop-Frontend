@@ -5,13 +5,13 @@ export interface CalendarEvent {
   orderId: string;
   title: string;
   date: Date;
+  type: 'order' | 'delivery';
   status: OrderStatus;
-  description: string;
-  deliveryDate?: Date;
+  details: string;
 }
 
 export interface CalendarFilters {
-  statusFilter: OrderStatus | 'all';
+  status: OrderStatus | 'all';
   dateRange: {
     start: Date | null;
     end: Date | null;

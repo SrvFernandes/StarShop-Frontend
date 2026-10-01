@@ -1,49 +1,51 @@
 'use client';
 
 import React, { useState } from 'react';
+import { addMonths, subMonths } from 'date-fns';
 import { 
   CalendarView, 
+  CalendarHeader, 
   CalendarFilters, 
-  EventDetails, 
-  CalendarHeader 
+  EventDetails 
 } from '@/features/buyer/calendar';
 import { useCalendar } from '@/features/buyer/calendar/hooks/useCalendar';
 import { CalendarEvent as EventType } from '@/features/buyer/calendar/types/calendar';
-import { addMonths, subMonths } from 'date-fns';
 
-// Mock data - In a real scenario, this would come from an API or Zustand store
+// Mock data for orders - In real scenario, this comes from an API/Store
 const MOCK_ORDERS = [
-  { id: '101', createdAt: new Date(), status: 'delivered', totalAmount: 150.00 },
-  { id: '102', createdAt: addMonths(new Date(), 0), status: 'shipped', totalAmount: 89.90 },
-  { id: '103', createdAt: subMonths(new Date(), 0), status: 'pending', totalAmount: 210.00 },
+  { id: '101', status: 'delivered', deliveryDate: new Date(), createdAt: new Date() },
+  { id: '102', status: 'shipped', deliveryDate: addMonths(new Date(), 0), createdAt: new Date() },
+  { id: '103', status: 'pending', deliveryDate: subMonths(new Date(), 0), createdAt: new Date() },
 ];
 
-export default function BuyerCalendarPage() {
-  const [currentMonth, setCurrentMonth] = useState(new Date());
+export default function CalendarPage() {
+  const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedEvent, setSelectedEvent] = useState<EventType | null>(null);
-  const { filteredEvents, filters, setFilters } = useCalendar(MOCK_ORDERS);
+  
+  const { events, filters, setFilters } = useCalendar(MOCK_ORDERS);
 
   return (
-    <div className="p-6 min-h-screen bg-transparent text-white">
-      <div className="max-w-6xl mx-auto">
-        <CalendarHeader 
-          currentDate={currentMonth} 
-          onPrev={() => setCurrentMonth(subMonths(currentMonth, 1))}
-          onNext={() => setCurrentMonth(addMonths(currentMonth, 1))}
-        />
-        
-        <CalendarFilters filters={filters} setFilters={setFilters} />
-        
-        <CalendarView 
-          events={filteredEvents} 
-          onEventClick={(event) => setSelectedEvent(event)} 
-        />
+    <div className="p-6 min-h-screen text-white">
+      <h1 className="text-3xl font-bold mb-6">My Shopping Calendar</h1>
+      
+      <CalendarFilters filters={filters} setFilters={setFilters} />
+      
+      <CalendarHeader 
+        currentDate={currentDate} 
+        onPrevMonth={() => setCurrentDate(subMonths(currentDate, 1))}
+        onNextMonth={() => setCurrentDate(addMonths(currentDate, 1))}
+      />
+      
+      <CalendarView 
+        currentDate={currentDate} 
+        events={events} 
+        onEventClick={setSelectedEvent} 
+      />
 
-        <EventDetails 
-          event={selectedEvent} 
-          onClose={() => setSelectedEvent(null)} 
-        />
-      </div>
+      <EventDetails 
+        event={selectedEvent} 
+        onClose={() => setSelectedEvent(null)} 
+      />
     </div>
   );
 }

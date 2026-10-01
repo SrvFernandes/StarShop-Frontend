@@ -1,41 +1,40 @@
 import { useState, useMemo } from 'react';
-import { CalendarEvent, CalendarFilters, OrderStatus } from '../types/calendar';
+import { CalendarEvent, CalendarFilters } from '../types/calendar';
 import { isWithinInterval, startOfDay } from 'date-fns';
 
 export const useCalendar = (orders: any[]) => {
   const [filters, setFilters] = useState<CalendarFilters>({
-    statusFilter: 'all',
+    status: 'all',
     dateRange: { start: null, end: null },
   });
 
   const events = useMemo(() => {
     return orders.map(order => ({
-      id: order.id,
+      id: `event-${order.id}`,
       orderId: order.id,
       title: `Order #${order.id.slice(-6)}`,
-      date: new Date(order.createdAt),
-      status: order.status as OrderStatus,
-      description: order.totalAmount ? `Total: $${order.totalAmount}` : 'No details available',
-      deliveryDate: order.deliveryDate ? new Date(order.deliveryDate) : undefined,
+      date: new Date(order.deliveryDate || order.createdAt),
+      type: order.status === 'delivered' ? 'delivery' : 'order',
+      status: order.status as any,
+      details: `Order status: ${order.status}`,
     }));
   }, [orders]);
 
   const filteredEvents = useMemo(() => {
     return events.filter(event => {
-      const matchesStatus = filters.statusFilter === 'all' || event.status === filters.statusFilter;
-      const matchesDate = (!filters.dateRange.start || !filters.dateRange.end) 
+      const statusMatch = filters.status === 'all' || event.status === filters.status;
+      const dateMatch = (!filters.dateRange.start || !filters.dateRange.end) 
         ? true 
         : isWithinInterval(startOfDay(event.date), { 
             start: startOfDay(filters.dateRange.start!), 
             end: startOfDay(filters.dateRange.end!) 
           });
-      
-      return matchesStatus && matchesDate;
+      return statusMatch && dateMatch;
     });
   }, [events, filters]);
 
   return {
-    filteredEvents,
+    events: filteredEvents,
     filters,
     setFilters,
   };
